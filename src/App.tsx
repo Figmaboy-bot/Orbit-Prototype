@@ -13,6 +13,7 @@ import { Amount } from './screens/Amount';
 import { Details } from './screens/Details';
 import { Home } from './screens/Home';
 import { Recipients } from './screens/Recipients';
+import { isNative, syncNativeStatusBar } from './platform';
 import { ConfirmSheet, PinSheet, SendOptionsSheet, SuccessSheet } from './sheets';
 import { ThemeContext, type Theme } from './theme';
 
@@ -22,14 +23,18 @@ type SheetName = 'send' | 'confirm' | 'pin' | 'success' | null;
 const PHONE_W = 430;
 const PHONE_H = 932;
 
+const systemTheme = (): Theme => (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
 function initialTheme(): Theme {
+  // The installed app follows the phone's appearance setting.
+  if (isNative) return systemTheme();
   try {
     const saved = localStorage.getItem('orbit-theme');
     if (saved === 'light' || saved === 'dark') return saved;
   } catch {
     /* storage unavailable */
   }
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return systemTheme();
 }
 
 function nowStamp() {
@@ -51,7 +56,17 @@ export default function App() {
   const scale = usePhoneScale();
 
   useEffect(() => {
+    if (!isNative) return;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => setTheme(systemTheme());
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    syncNativeStatusBar(theme);
+    if (isNative) return;
     try {
       localStorage.setItem('orbit-theme', theme);
     } catch {
@@ -167,14 +182,16 @@ export default function App() {
           </div>
         </div>
 
-        <button
-          className="theme-toggle"
-          onClick={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          <span className="theme-toggle-dot" />
-          {theme === 'light' ? 'Dark mode' : 'Light mode'}
-        </button>
+        {!isNative && (
+          <button
+            className="theme-toggle"
+            onClick={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            <span className="theme-toggle-dot" />
+            <span className="theme-toggle-label">{theme === 'light' ? 'Dark mode' : 'Light mode'}</span>
+          </button>
+        )}
       </div>
     </ThemeContext.Provider>
   );
@@ -188,7 +205,7 @@ function usePhoneScale() {
     const update = () => {
       cancelAnimationFrame(frame.current);
       frame.current = requestAnimationFrame(() => {
-        if (window.innerWidth <= 500) return setScale(1);
+        if (isNative || window.innerWidth <= 500) return setScale(1);
         setScale(Math.min(1, (window.innerHeight - 48) / PHONE_H, (window.innerWidth - 32) / PHONE_W));
       });
     };

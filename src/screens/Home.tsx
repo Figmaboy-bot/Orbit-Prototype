@@ -36,7 +36,9 @@ export function Home({ transactions, onSend, onToast }: Props) {
         <div className="home-user">
           <Avatar art="lina" bg={theme === 'dark' ? '#150433' : '#e1d0ff'} size={40} />
           <div className="home-greeting">
-            <p className="home-hello">Welcome back, Sulaimon 👋,</p>
+            <p className="home-hello">
+              Welcome back, Sulaimon <span className="emoji">👋</span>,
+            </p>
             <p className="home-tagline">Your money in motion</p>
           </div>
         </div>

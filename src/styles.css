@@ -6,9 +6,25 @@
   --success: #2ecc71;
   --error: #e74c3c;
   --track: -0.6926px;
-  --font: 'General Sans', system-ui, sans-serif;
-  --font-alt: 'Satoshi', 'General Sans', system-ui, sans-serif;
+  --font: 'General Sans', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+  --font-alt: 'Satoshi', 'General Sans', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
   --font-sf: -apple-system, 'SF Pro Text', 'SF Pro', system-ui, sans-serif;
+  /* Space reserved for the device status bar and home indicator. The desktop
+     phone frame draws them at the Figma sizes; real devices use safe areas. */
+  --chrome-top: 64px;
+  --chrome-bottom: 37px;
+}
+
+.native {
+  --chrome-top: max(env(safe-area-inset-top), 20px);
+  --chrome-bottom: env(safe-area-inset-bottom);
+}
+
+@media (max-width: 500px) {
+  :root {
+    --chrome-top: max(env(safe-area-inset-top), 20px);
+    --chrome-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 :root,
@@ -214,6 +230,23 @@ input {
   isolation: isolate;
 }
 
+.native .stage {
+  padding: 0;
+  display: block;
+}
+
+.native .phone-slot {
+  width: 100% !important;
+  height: 100dvh !important;
+}
+
+.native .phone {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 @media (max-width: 500px) {
   .stage {
     padding: 0;
@@ -260,9 +293,12 @@ input {
   .theme-toggle {
     right: auto;
     left: 10px;
-    bottom: 6px;
-    padding: 4px 10px;
-    font-size: 11px;
+    bottom: calc(var(--chrome-bottom) + 6px);
+    padding: 8px;
+    opacity: 0.85;
+  }
+  .theme-toggle-label {
+    display: none;
   }
 }
 
@@ -270,7 +306,7 @@ input {
 .status-bar {
   position: absolute;
   inset: 0 0 auto;
-  height: 64px;
+  height: var(--chrome-top);
   display: flex;
   align-items: flex-end;
   z-index: 5;
@@ -314,12 +350,25 @@ input {
   background: var(--chrome);
 }
 
+/* On a real device the OS draws the status bar and home indicator. */
+.native .status-bar > *,
+.native .home-indicator span {
+  display: none;
+}
+
+@media (max-width: 500px) {
+  .status-bar > *,
+  .home-indicator span {
+    display: none;
+  }
+}
+
 .home-indicator {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 37px;
+  height: var(--chrome-bottom);
   z-index: 5;
   background: var(--bg);
   pointer-events: none;
@@ -360,7 +409,7 @@ input {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  padding: 88px 24px 120px;
+  padding: calc(var(--chrome-top) + 24px) 24px calc(var(--chrome-bottom) + 96px);
 }
 
 .screen::-webkit-scrollbar,
@@ -421,7 +470,7 @@ input {
 
 /* ---------- Home ---------- */
 .home {
-  padding-bottom: 170px;
+  padding-bottom: calc(var(--chrome-bottom) + 133px);
 }
 
 .home-header {
@@ -448,6 +497,12 @@ input {
   font-size: 16px;
   line-height: 20px;
   color: var(--text);
+}
+
+.emoji {
+  /* WebKit won't fall back past General Sans for emoji, so name the emoji fonts directly. */
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  font-weight: 400;
 }
 
 .home-tagline {
@@ -675,6 +730,13 @@ input {
   white-space: nowrap;
 }
 
+@media (max-width: 420px) {
+  .invite-text {
+    white-space: normal;
+    max-width: 58%;
+  }
+}
+
 .invite-text em {
   font-style: italic;
   color: var(--banner-accent);
@@ -682,7 +744,7 @@ input {
 
 .invite-gift {
   position: absolute;
-  left: 239.74px;
+  right: -30.37px;
   top: calc(50% - 1.47px);
   width: 172.628px;
   height: 151.063px;
@@ -701,7 +763,7 @@ input {
 .invite-close {
   position: absolute;
   z-index: 1;
-  left: 338px;
+  right: 12px;
   top: 12px;
   width: 32px;
   height: 32px;
@@ -842,7 +904,7 @@ input {
 .bottom-nav {
   position: absolute;
   left: 50%;
-  bottom: 61px;
+  bottom: calc(var(--chrome-bottom) + 24px);
   z-index: 4;
   transform: translateX(-50%);
   display: flex;
@@ -1021,18 +1083,29 @@ input {
   justify-content: space-between;
 }
 
+.send-to-row {
+  gap: 12px;
+}
+
 .send-to-person {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .send-to-text {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
   line-height: 20px;
   white-space: nowrap;
+}
+
+.send-to-text p {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .send-to-name {
@@ -1047,7 +1120,8 @@ input {
 }
 
 .pill-button {
-  padding: 12px 32px;
+  flex-shrink: 0;
+  padding: 12px clamp(20px, 6vw, 32px);
   border-radius: 28px;
   background: var(--primary-50);
   color: #fff;
@@ -1058,6 +1132,7 @@ input {
 
 .currency-chips {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -1138,9 +1213,10 @@ input {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 61px;
+  bottom: calc(var(--chrome-bottom) + 24px);
   display: flex;
   justify-content: center;
+  padding: 0 24px;
   z-index: 4;
 }
 
@@ -1186,6 +1262,7 @@ input {
 
 .primary-button {
   width: 280px;
+  max-width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1269,7 +1346,10 @@ input {
   position: absolute;
   left: 12px;
   right: 12px;
-  bottom: 32px;
+  bottom: max(12px, calc(var(--chrome-bottom) - 5px));
+  max-height: calc(100% - var(--chrome-top) - 12px);
+  overflow-y: auto;
+  scrollbar-width: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1568,7 +1648,7 @@ input {
 .toast {
   position: absolute;
   left: 50%;
-  top: 72px;
+  top: calc(var(--chrome-top) + 8px);
   z-index: 20;
   transform: translateX(-50%);
   max-width: calc(100% - 48px);

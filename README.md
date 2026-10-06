@@ -23,7 +23,18 @@ npm run dev      # http://localhost:5173
 npm run build    # static build in dist/ (relative paths, so it can be hosted anywhere)
 ```
 
-On desktop the phone frame scales to fit the window; at 500px wide or less it goes full-screen.
+On desktop the phone frame scales to fit the window. At 500px wide or less, and inside the app,
+it goes full-screen and uses the device's real status bar and home indicator (safe areas).
+
+## iOS app (Capacitor)
+
+```bash
+npm run build && npx cap sync ios   # copy the web build into the iOS project
+npx cap open ios                    # open in Xcode, pick a simulator or device, press Run
+```
+
+In the app, dark mode follows the iPhone's appearance setting (Settings → Display & Brightness,
+or Features → Toggle Appearance in Simulator).
 
 ## Assets
 
