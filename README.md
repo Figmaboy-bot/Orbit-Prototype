@@ -1,32 +1,32 @@
-# React + TypeScript + Vite
+# Orbit — Send to Orbit User prototype
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A clickable prototype of the Orbit "Send to Orbit User" flow, built from the Orbit Figma file
+(light frames `670:*`, dark frames `170:*`). Works with a light/dark toggle.
 
-Currently, two official plugins are available:
+## Flow
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. **Home** → tap **Send** → Send sheet → **Send to Orbit User**
+2. **Recipients**: search, or pick a favorite or recent recipient
+3. **Amount**: choose a currency, enter an amount, add a message → **Continue**
+4. **Transfer Confirmation** → **Send Funds**
+5. **Enter your PIN**: any 6 digits, or **Use biometric instead**
+6. **Transaction Successful** → **View Details** (or **Done** to go back Home)
+7. **Transaction Details**: back returns Home, where the new transfer is at the top of Recent Transactions
 
-## React Compiler
+Other buttons (Top Up, Convert, bank/crypto transfers, and so on) show a "not part of this prototype" toast.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Run
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # static build in dist/ (relative paths, so it can be hosted anywhere)
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+On desktop the phone frame scales to fit the window; at 500px wide or less it goes full-screen.
+
+## Assets
+
+All icons, flags and avatar layers are the original SVGs exported from Figma, in `public/assets`.
+`scripts/download-assets.mjs` fetches them again from `scripts/assets-manifest.mjs`. Figma MCP
+asset links expire after 7 days, so regenerate the manifest before re-running it.
