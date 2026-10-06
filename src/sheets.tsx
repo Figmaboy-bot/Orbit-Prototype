@@ -30,6 +30,25 @@ export function SendOptionsSheet({ onClose, onOrbitUser, onToast }: {
   );
 }
 
+// iOS only raises the keyboard when an input is focused inside a tap handler.
+// The PIN input doesn't exist yet when "Send Funds" is tapped, so focus a
+// stand-in number field during the tap and hand focus over once the PIN sheet mounts.
+let keyboardPrimer: HTMLInputElement | null = null;
+
+function primeNumberPad() {
+  keyboardPrimer = document.createElement('input');
+  keyboardPrimer.inputMode = 'numeric';
+  keyboardPrimer.setAttribute('aria-hidden', 'true');
+  Object.assign(keyboardPrimer.style, { position: 'fixed', top: '0', left: '0', width: '1px', height: '1px', opacity: '0', fontSize: '16px' });
+  document.body.appendChild(keyboardPrimer);
+  keyboardPrimer.focus();
+}
+
+function releaseNumberPad() {
+  keyboardPrimer?.remove();
+  keyboardPrimer = null;
+}
+
 export function ConfirmSheet({ recipient, currency, amount, onClose, onSend }: {
   recipient: Recipient;
   currency: CurrencyCode;
@@ -49,7 +68,14 @@ export function ConfirmSheet({ recipient, currency, amount, onClose, onSend }: {
           Edit
         </TextLink>
       </div>
-      <PrimaryButton onClick={onSend}>Send Funds</PrimaryButton>
+      <PrimaryButton
+        onClick={() => {
+          primeNumberPad();
+          onSend();
+        }}
+      >
+        Send Funds
+      </PrimaryButton>
     </Sheet>
   );
 }
@@ -62,7 +88,10 @@ export function PinSheet({ onClose, onConfirm }: { onClose: () => void; onConfir
   const [verifying, setVerifying] = useState(false);
   const input = useRef<HTMLInputElement>(null);
 
-  useEffect(() => input.current?.focus(), []);
+  useEffect(() => {
+    input.current?.focus();
+    releaseNumberPad();
+  }, []);
 
   const biometric = () => {
     setVerifying(true);
@@ -87,6 +116,7 @@ export function PinSheet({ onClose, onConfirm }: { onClose: () => void; onConfir
                   ref={input}
                   className="pin-input"
                   inputMode="numeric"
+                  pattern="[0-9]*"
                   autoComplete="one-time-code"
                   maxLength={PIN_LENGTH}
                   value={pin}
